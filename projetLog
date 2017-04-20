@@ -1,0 +1,70 @@
+
+#Il faut remplacer les "XX" par votre adresse mail
+
+
+import re
+import csv
+
+import smtplib
+import getpass
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+
+f = open("log.log", "r")
+fichierAEnvoyer=open("logssh.txt", "a")
+
+for ligne in f:
+    t = open("traitement.csv", "a")
+    newligne=ligne.replace(' ',';')
+    if re.search("([0-9]{1,3}\.){3}[0-9]{1,3}", newligne):
+        lecteur=csv.writer(t,delimiter=";")
+        t.write(newligne)
+        t.flush()
+        t.seek(0)
+    t.close()
+    view = open("traitement.csv", "r")
+    rdr=csv.reader(view,delimiter=";")
+    for row in rdr:
+        fichierAEnvoyer.write(row[0]+' ')
+        fichierAEnvoyer.write(row[1]+' ')
+        fichierAEnvoyer.write(row[5]+' ')
+        fichierAEnvoyer.write(row[6]+' ')
+        fichierAEnvoyer.write(row[7]+' ')
+        fichierAEnvoyer.write(row[8]+'\n')
+         
+     
+
+#MAIL
+msg=MIMEMultipart()
+msg['From']="XX@gmail.com"
+msg['To']="XX@gmail.com"
+msg['Subject']="Fichier log ssh"
+password=getpass.getpass("Mot de passe : ")
+
+body="test 1.0"
+
+msg.attach(MIMEText(body, 'plain'))
+
+filename = "logssh.txt"
+attachment = open("logssh.txt", "rb")
+
+part = MIMEBase('application', 'octet-stream')
+part.set_payload((attachment).read())
+encoders.encode_base64(part)
+part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+
+
+msg.attach(part)
+mailserver = smtplib.SMTP('smtp.gmail.com', 587)
+mailserver.ehlo()
+mailserver.starttls()
+mailserver.ehlo()
+mailserver.login('XX@gmail.com', password)
+mailserver.sendmail('XX@gmail.com', 'XX@gmail.com', msg.as_string())
+mailserver.quit()
+
+    
+
+        
