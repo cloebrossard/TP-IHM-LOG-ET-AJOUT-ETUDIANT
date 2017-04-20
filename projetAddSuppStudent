@@ -1,0 +1,76 @@
+#-*-coding:utf-*-
+import dbm
+import tkinter as tk
+
+
+
+db=dbm.open('Student', 'c')
+
+class SampleApp(tk.Tk):
+	def __init__(self):
+		tk.Tk.__init__(self)
+		
+		# construction des widgets
+		self.suppvar=tk.StringVar()
+		self.F1=tk.Frame()
+		self.s=tk.Scrollbar(self.F1)
+		self.L=tk.Listbox(self.F1)
+		self.F2=tk.Frame()
+		self.entry=tk.Entry(self)
+		self.button = tk.Button(self, text="Add", command=self.on_button)
+		self.entry1=tk.Entry(self, textvariable=self.suppvar)
+		self.button1 = tk.Button(self, text="Supp", command=self.on_button1)		
+		
+		#configuration des widgets
+		self.F1.pack(side=tk.TOP)
+		self.lab=tk.Label(self.F2)
+		self.lab.pack()
+		self.F2.pack(side=tk.TOP)		
+		self.s.pack(side=tk.RIGHT, fill=tk.Y)
+		self.L.pack(side=tk.LEFT, fill=tk.Y)
+		self.s['command']=self.L.yview
+		self.L['yscrollcommand']=self.s.set
+		self.button.pack(side="left")
+		self.entry.pack(side="left")		
+		#poll()				
+		self.button1.pack(side="left")
+		self.entry1.pack(side="left")
+		
+		self.L.bind('<ButtonRelease-1>', self.click)
+		
+		for key in db.keys():
+			for item in [key]:
+				self.L.insert(tk.END, item)		
+		
+	
+	def on_button(self):
+		self.ajouter(self.entry.get())
+		
+	def on_button1(self):
+                self.supprimer(self.entry1.get())
+
+	def ajouter(self,nom):
+		db[nom]='GROUPE ITS'
+		self.L.insert(tk.END, nom)
+		
+		
+	def supprimer(self,nom):
+		del db[nom]
+		self.L.delete(0, tk.END)
+		self.remplirListe()
+		
+	def remplirListe(self):
+		for nom in db.keys():
+			self.L.insert(tk.END, nom)
+	
+	
+	
+	def click(self,evt):
+			a=self.L.curselection()
+			self.suppvar.set( self.L.get(a).decode("utf-8") )
+			
+
+app=SampleApp()
+
+
+app.mainloop()
